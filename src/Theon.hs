@@ -44,6 +44,9 @@ intFrom :: Maybe BS.ByteString -> Int
 intFrom Nothing  = 0
 intFrom (Just a) = B.decode $ BL.fromStrict a
 
+bsFrom :: Int -> BS.ByteString
+bsFrom = BL.toStrict . B.encode
+
 contentTypePlain = [ ("Content-Type", "text/plain") ]
 success = ""
 
@@ -83,7 +86,8 @@ reportStats curRef seqRef = do
   cur <- readMVar curRef
   seq <- readMVar seqRef
   let spread = seq - cur
-  when (spread > 0) $ putStrLn $ "Spread " ++ (show spread)
+  putStrLn $
+    "Cur " ++ (show cur) ++ ", Seq " ++ (show seq) ++ ", Spread " ++ (show spread)
   reportStats curRef seqRef
 
 
@@ -94,7 +98,7 @@ process db curRef delay kafka topic = do
     (cur', events, actions) <- process' cur [] []
     when (not $ null $ events) $ do
       let messages = map (\s -> KafkaProduceMessage s) events
-      let curBS'   = BL.toStrict $ B.encode cur'
+      let curBS'   = bsFrom cur'
       let actions' = (LDB.Put "cur" curBS') : actions
       produceMessageBatch topic KafkaUnassignedPartition messages
       runResourceT $ LDB.write db def actions'
@@ -106,7 +110,7 @@ process db curRef delay kafka topic = do
   where
     process' :: Int -> [BS.ByteString] -> [LDB.BatchOp] -> IO (Int, [BS.ByteString], [LDB.BatchOp])
     process' cur events actions = do
-      let curBS = BL.toStrict $ B.encode cur
+      let curBS = bsFrom cur
       rawEvent <- runResourceT $ LDB.get db def curBS
       case rawEvent of
         Nothing -> return (cur, events, actions)
@@ -123,8 +127,8 @@ app db seqRef req respond = do
   body <- requestBody req
   modifyMVar seqRef $ \seq -> do
     let seq'   = seq + 1
-    let seqBS  = BL.toStrict $ B.encode seq
-    let seqBS' = BL.toStrict $ B.encode seq'
+    let seqBS  = bsFrom seq
+    let seqBS' = bsFrom seq'
     runResourceT $
       LDB.write db def [
         LDB.Put seqBS body,  -- Write event
