@@ -9,8 +9,8 @@ import Haskakafka
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.HTTP.Types (status200)
-import Data.ByteString.Char8 (ByteString)
 import qualified Data.ByteString.Char8 as BS
+import Data.ByteString.Char8 (ByteString)
 import Control.Concurrent (forkIO)
 import Control.Concurrent.Chan
 
@@ -18,7 +18,6 @@ import Control.Concurrent.Chan
 data Options = Options {
   broker :: String,
   topic :: String,
-  delay :: Int,
   port :: Int
 } deriving (Eq, Ord, Show)
 
@@ -50,7 +49,8 @@ process chan topic = do
 
 app :: Chan ByteString -> Application
 app chan req respond = do
-  event <- requestBody req
-  writeChan chan event
+  rawEvents <- requestBody req
+  let events = BS.split '\n' rawEvents
+  mapM_ (writeChan chan) events
   respond $
     responseLBS status200 contentTypePlain ""
