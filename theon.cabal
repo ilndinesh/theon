@@ -1,0 +1,63 @@
+-- The name of the package.
+name:                theon
+
+-- The package version.  See the Haskell package versioning policy (PVP)
+-- for standards guiding when and how versions should be incremented.
+-- http://www.haskell.org/haskellwiki/Package_versioning_policy
+-- PVP summary:      +-+------- breaking API changes
+--                   | | +----- non-breaking API additions
+--                   | | | +--- code changes with no API change
+version:             0.0.0.0
+
+-- A short (one-line) description of the package.
+synopsis:            An experimental implementation of Franz
+
+-- A longer description of the package.
+description:         An experimental implementation of Franz in Haskell
+
+-- The license under which the package is released.
+-- license:          ISC
+
+-- The file containing the license text.
+license-file:        LICENSE
+
+-- The package author(s).
+author:              Sean Clemmer
+
+-- An email address to which users can send suggestions, bug reports, and
+-- patches.
+maintainer:          sczizzo@gmail.com
+
+-- A copyright notice.
+copyright:           Copyright (c) 2015 Sean Clemmer
+
+category:            Development
+
+build-type:          Simple
+
+-- Constraint on the version of Cabal needed to build this package.
+cabal-version:       >=1.8
+
+
+executable theon
+  -- .hs or .lhs file containing the Main module.
+  main-is:           Main.hs
+  hs-source-dirs:    src
+  ghc-options:       -O3 -threaded
+
+  -- Modules included in this executable, other than Main.
+  -- other-modules:
+
+  -- Other library packages from which modules are imported.
+  build-depends:     base ==4.*,
+                     optparse-applicative ==0.11.*,
+                     bytestring ==0.10.*,
+                     wai ==3.0.*,
+                     warp ==3.0.*,
+                     http-types ==0.8.*,
+                     leveldb-haskell ==0.6.*,
+                     resourcet ==1.1.*,
+                     transformers ==0.4.*,
+                     data-default ==0.5.*,
+                     binary ==0.7.*,
+                     async ==2.0.*
