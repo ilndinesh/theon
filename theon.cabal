@@ -55,10 +55,4 @@ executable theon
                      wai ==3.0.*,
                      warp ==3.0.*,
                      http-types ==0.8.*,
-                     leveldb-haskell ==0.6.*,
-                     resourcet ==1.1.*,
-                     transformers ==0.4.*,
-                     data-default ==0.5.*,
-                     binary ==0.7.*,
-                     async ==2.0.*,
                      haskakafka ==1.0.*

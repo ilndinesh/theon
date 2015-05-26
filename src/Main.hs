@@ -9,12 +9,7 @@ import Options.Applicative
 
 options :: Parser Options
 options = Options
-  <$> strOption (long "journal"
-    <> short 'j'
-    <> metavar "FILE"
-    <> help "Path to journal file (default: theon.db)"
-    <> value "theon.db")
-  <*> strOption (long "broker"
+  <$> strOption (long "broker"
     <> short 'b'
     <> metavar "HOST_PORT"
     <> help "Kafka broker (default: localhost:9092)"
