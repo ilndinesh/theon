@@ -14,6 +14,21 @@ options = Options
     <> metavar "FILE"
     <> help "Path to journal file (default: theon.db)"
     <> value "theon.db")
+  <*> strOption (long "broker"
+    <> short 'b'
+    <> metavar "HOST_PORT"
+    <> help "Kafka broker (default: localhost:9092)"
+    <> value "localhost:9092")
+  <*> strOption (long "topic"
+    <> short 't'
+    <> metavar "NAME"
+    <> help "Kafka topic name (default: theon)"
+    <> value "theon")
+  <*> option auto (long "delay"
+    <> short 'd'
+    <> metavar "MICROS"
+    <> help "Main loop delay (default: 10000)"
+    <> value 10000)
   <*> option auto (long "port"
     <> short 'p'
     <> metavar "NUM"

@@ -60,4 +60,5 @@ executable theon
                      transformers ==0.4.*,
                      data-default ==0.5.*,
                      binary ==0.7.*,
-                     async ==2.0.*
+                     async ==2.0.*,
+                     haskakafka ==1.0.*

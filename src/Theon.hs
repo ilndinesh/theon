@@ -5,6 +5,7 @@ module Theon (Options(..), Mode(..), versionMode, normalMode) where
 import Paths_theon (version)
 import Data.Version (showVersion)
 
+import Haskakafka
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.HTTP.Types (status200)
@@ -28,6 +29,9 @@ import Data.Bits (shift)
 
 data Options = Options {
   journal :: FilePath,
+  broker :: String,
+  topic :: String,
+  delay :: Int,
   port :: Int
 } deriving (Eq, Ord, Show)
 
@@ -65,28 +69,39 @@ normalMode opts = runResourceT $ do
   curRef <- liftIO $ newMVar (intFrom rawCur)
   let cur = intFrom rawCur
 
-  liftIO $ forkIO $ process db curRef
+  liftIO $ forkIO $ reportStats curRef seqRef
+  liftIO $ withKafkaProducer [] [] (broker opts) (topic opts) $
+    \kafka topic -> forkIO $ process db curRef (delay opts) kafka topic
   liftIO $ putStrLn $ (show opts) ++ ", Seq " ++ (show seq) ++ ", Cur " ++ (show cur)
   liftIO $ run (port opts) (app db seqRef)
 
 
 
-process :: DB -> Cursor -> IO ()
-process db curRef = do
+reportStats :: Cursor -> Cursor -> IO ()
+reportStats curRef seqRef = do
+  threadDelay 5000000
+  cur <- readMVar curRef
+  seq <- readMVar seqRef
+  let spread = seq - cur
+  when (spread > 0) $ putStrLn $ "Spread " ++ (show spread)
+  reportStats curRef seqRef
+
+
+
+process :: DB -> Cursor -> Int -> Kafka -> KafkaTopic -> IO ()
+process db curRef delay kafka topic = do
   modifyMVar curRef $ \cur -> do
     (cur', events, actions) <- process' cur [] []
-
-    -- TODO: Process events
-    when (not $ null $ events) $
-      putStrLn $ show cur'
-
-    let curBS'   = BL.toStrict $ B.encode cur'
-    let actions' = (LDB.Put "cur" curBS') : actions
-    runResourceT $ LDB.write db def actions'
+    when (not $ null $ events) $ do
+      let messages = map (\s -> KafkaProduceMessage s) events
+      let curBS'   = BL.toStrict $ B.encode cur'
+      let actions' = (LDB.Put "cur" curBS') : actions
+      produceMessageBatch topic KafkaUnassignedPartition messages
+      runResourceT $ LDB.write db def actions'
     return (cur', ())
 
-  threadDelay 100000 -- 100 ms
-  process db curRef
+  threadDelay delay
+  process db curRef delay kafka topic
 
   where
     process' :: Int -> [BS.ByteString] -> [LDB.BatchOp] -> IO (Int, [BS.ByteString], [LDB.BatchOp])
@@ -105,9 +120,7 @@ process db curRef = do
 
 app :: DB -> Cursor -> Application
 app db seqRef req respond = do
-  let topic = requestTopic req
   body <- requestBody req
-
   modifyMVar seqRef $ \seq -> do
     let seq'   = seq + 1
     let seqBS  = BL.toStrict $ B.encode seq
@@ -120,8 +133,3 @@ app db seqRef req respond = do
     resp <- respond $
       responseLBS status200 contentTypePlain success
     return (seq', resp)
-
-  where
-    requestTopic req   = fromPathInfo (pathInfo req)
-    fromPathInfo (p:_) = p
-    fromPathInfo _     = "theon"
