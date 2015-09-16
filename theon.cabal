@@ -55,4 +55,5 @@ executable theon
                      wai ==3.0.*,
                      warp ==3.0.*,
                      http-types ==0.8.*,
-                     haskakafka ==1.0.*
+                     haskakafka ==1.0.*,
+                     containers ==0.5.*

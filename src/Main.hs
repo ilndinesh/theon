@@ -32,13 +32,8 @@ options = Options
   <$> strOption (long "broker"
     <> short 'b'
     <> metavar "HOST_PORT"
-    <> help "Kafka broker (default: localhost:9092)"
+    <> help "Kafka broker address(es) (default: localhost:9092)"
     <> value "localhost:9092")
-  <*> strOption (long "topic"
-    <> short 't'
-    <> metavar "NAME"
-    <> help "Kafka topic name (default: theon)"
-    <> value "theon")
   <*> option auto (long "port"
     <> short 'p'
     <> metavar "NUM"
