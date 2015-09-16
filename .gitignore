@@ -5,6 +5,7 @@
 *.hp
 *.ps
 *.aux
+*.deb
 *.log
 *.out
 *.pid

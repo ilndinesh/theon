@@ -10,10 +10,10 @@ name:                theon
 version:             0.0.0.0
 
 -- A short (one-line) description of the package.
-synopsis:            An experimental implementation of Franz
+synopsis:            A simple HTTP-to-Kafka relay built for speed
 
 -- A longer description of the package.
-description:         An experimental implementation of Franz in Haskell
+description:         A simple HTTP-to-Kafka relay built for speed.
 
 -- The license under which the package is released.
 -- license:          ISC
