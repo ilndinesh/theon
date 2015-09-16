@@ -5,9 +5,6 @@ module Theon (Options(..), Mode(..), versionMode, normalMode) where
 import Paths_theon (version)
 import Data.Version (showVersion)
 
-import Data.Map (Map)
-import qualified Data.Map as Map
-import Data.Maybe (fromJust)
 import Haskakafka
 import Network.Wai
 import Network.Wai.Handler.Warp
@@ -16,7 +13,8 @@ import qualified Data.ByteString.Char8 as BS
 import Data.ByteString.Char8 (ByteString)
 import Control.Concurrent (forkIO)
 import Control.Concurrent.Chan
-import Control.Monad (replicateM_)
+import qualified Data.Map as Map
+import Data.Map (Map)
 
 
 data Options = Options {
@@ -27,9 +25,13 @@ data Options = Options {
 
 data Mode = VersionMode | NormalMode Options deriving (Eq, Ord, Show)
 
-type TopicEvent = (ByteString, ByteString)
+type Topic = ByteString
 
-type TopicMap = Map ByteString KafkaTopic
+type Message = ByteString
+
+type ProduceEvent = (Topic, [Message])
+
+type TopicMap = Map Topic KafkaTopic
 
 contentTypePlain = [ ("Content-Type", "text/plain") ]
 
@@ -46,27 +48,26 @@ normalMode opts = do
   run (port opts) (app chan)
 
 
-process :: Chan TopicEvent -> Kafka -> TopicMap -> IO ()
+process :: Chan ProduceEvent -> Kafka -> TopicMap -> IO ()
 process chan kafka topics = do
-  (topicName, event) <- readChan chan
-  let message = KafkaProduceMessage event
+  (topicName, rawMessages) <- readChan chan
+  let messages = map (\m -> KafkaProduceMessage m) rawMessages
   case Map.lookup topicName topics of
     Nothing -> do
       topic <- newKafkaTopic kafka (BS.unpack topicName) []
-      produceMessage topic KafkaUnassignedPartition message
+      produceMessageBatch topic KafkaUnassignedPartition messages
       let updatedTopics = Map.insert topicName topic topics
       process chan kafka updatedTopics
     Just topic -> do
-      produceMessage topic KafkaUnassignedPartition message
+      produceMessageBatch topic KafkaUnassignedPartition messages
       process chan kafka topics
 
 
-app :: Chan TopicEvent -> Application
+app :: Chan ProduceEvent -> Application
 app chan req respond = do
-  rawEvents <- requestBody req
+  rawMessages <- requestBody req
+  let messages = BS.split '\n' rawMessages
   let topic = BS.drop 1 $ rawPathInfo req
-  let events = BS.split '\n' rawEvents
-  let topicEvents = map (\e -> (topic, e)) events
-  mapM_ (writeChan chan) topicEvents
+  writeChan chan (topic, messages)
   respond $
     responseLBS status200 contentTypePlain ""

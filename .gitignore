@@ -10,8 +10,7 @@
 *.pid
 *.swp
 *.prof
-*.json
-*.lua
+etc
 doc
 tmp
 dist
