@@ -12,7 +12,8 @@ Vagrant.configure('2') do |config|
     node.vm.hostname = 'build'
     node.vm.provision :shell, inline: <<-END
       export PATH="/root/.cabal/bin:$PATH"
-      rm /vagrant/*.deb
+      rm -r /vagrant/pkg
+      mkdir -p /vagrant/pkg
       apt-get update
       apt-get install -y libsnappy-dev git build-essential make haskell-platform
 
@@ -25,7 +26,7 @@ Vagrant.configure('2') do |config|
 
       apt-get install -y ruby ruby-dev libxml2-dev libxslt1-dev
       gem install --no-rdoc --no-ri fpm
-      cd /vagrant
+      cd /vagrant/pkg
       fpm --verbose \
         -s dir -t deb \
         -n librdkafka-dev -v 0.8.6 \
@@ -55,8 +56,8 @@ Vagrant.configure('2') do |config|
 
       apt-get install -y ruby ruby-dev libxml2-dev libxslt1-dev
       gem install --no-rdoc --no-ri fpm
-      cd /vagrant
-      version=$(grep '^version:' *.cabal | cut -d: -f2 | xargs)
+      cd /vagrant/pkg
+      version=$(grep '^version:' ../*.cabal | cut -d: -f2 | xargs)
       fpm --verbose \
         -s dir -t deb \
         -n theon -v "$version" \
@@ -78,7 +79,7 @@ Vagrant.configure('2') do |config|
     node.vm.provision :shell, inline: <<-END
       apt-get update
       apt-get install -y libsnappy1 libsnappy-dev
-      cd /vagrant
+      cd /vagrant/pkg
       dpkg -i librdkafka*.deb
       dpkg -i theon*.deb
     END

@@ -11,6 +11,7 @@
 *.pid
 *.swp
 *.prof
+pkg
 etc
 doc
 tmp

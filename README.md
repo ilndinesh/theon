@@ -19,4 +19,4 @@ Available options:
 
 ### `POST /:topic -d {}`
 
-Request data will be relayed to the give `:topic` in Kafka.
+Request data will be relayed to the given `:topic` in Kafka.
