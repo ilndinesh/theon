@@ -17,9 +17,11 @@ Vagrant.configure('2') do |config|
       apt-get update
       apt-get install -y libsnappy-dev git build-essential make haskell-platform
 
+      rdkafka_version=0.8.6
       rm -rf /tmp/librdkafka /tmp/rdkafka
       git clone https://github.com/edenhill/librdkafka /tmp/librdkafka
       cd /tmp/librdkafka
+      git checkout tags/$rdkafka_version
       ./configure --prefix=/usr
       make
       make install DESTDIR=/tmp/rdkafka
@@ -29,7 +31,7 @@ Vagrant.configure('2') do |config|
       cd /vagrant/pkg
       fpm --verbose \
         -s dir -t deb \
-        -n librdkafka-dev -v 0.8.6 \
+        -n librdkafka-dev -v $rdkafka_version \
         -d libsnappy1 \
         -d libsnappy-dev \
         -C /tmp/rdkafka \

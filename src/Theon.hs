@@ -8,18 +8,23 @@ import Data.Version (showVersion)
 import Haskakafka
 import Network.Wai
 import Network.Wai.Handler.Warp
-import Network.HTTP.Types (status200)
+import Network.HTTP.Types (status200, status401)
+import Network.Wai.Middleware.HttpAuth
 import qualified Data.ByteString.Char8 as BS
 import Data.ByteString.Char8 (ByteString)
 import Control.Concurrent (forkIO)
 import Control.Concurrent.Chan
 import qualified Data.Map as Map
 import Data.Map (Map)
+import Data.List (lookup)
 
 
 data Options = Options {
   broker :: String,
-  port :: Int
+  port :: Int,
+  auth :: Bool,
+  user :: String,
+  pass :: String
 } deriving (Eq, Ord, Show)
 
 
@@ -42,10 +47,16 @@ versionMode = putStrLn $ showVersion version
 
 normalMode :: Options -> IO ()
 normalMode opts = do
+  putStrLn $ show opts
   chan <- newChan
   withKafkaProducer [] [] (broker opts) ".theon" $
     \kafka _ -> forkIO $ process chan kafka Map.empty
-  run (port opts) (app chan)
+  case auth opts of
+    False -> run (port opts) (app chan)
+    True -> do
+      let u = BS.pack $ user opts
+      let p = BS.pack $ pass opts
+      run (port opts) $ checkAuthorization u p (app chan)
 
 
 process :: Chan ProduceEvent -> Kafka -> TopicMap -> IO ()
@@ -63,11 +74,16 @@ process chan kafka topics = do
       process chan kafka topics
 
 
+checkAuthorization :: ByteString -> ByteString -> Middleware
+checkAuthorization user pass =
+  basicAuth (\u p -> return $ u == user && p == pass) "theon"
+
+
 app :: Chan ProduceEvent -> Application
 app chan req respond = do
   rawMessages <- requestBody req
   let messages = BS.split '\n' rawMessages
-  let topic = BS.drop 1 $ rawPathInfo req
+  let topic    = BS.drop 1 $ rawPathInfo req
   writeChan chan (topic, messages)
   respond $
     responseLBS status200 contentTypePlain ""

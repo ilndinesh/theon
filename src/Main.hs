@@ -39,3 +39,16 @@ options = Options
     <> metavar "NUM"
     <> help "Port to serve application (default: 3000)"
     <> value 3000)
+  <*> switch (long "auth"
+    <> short 'a'
+    <> help "Enable HTTP Basic Auth (default: false)")
+  <*> strOption (long "user"
+    <> short 'u'
+    <> metavar "USERNAME"
+    <> help "Username for HTTP Basic Auth (default: theon)"
+    <> value "theon")
+  <*> strOption (long "pass"
+    <> short 'w'
+    <> metavar "PASSWORD"
+    <> help "Password for HTTP Basic Auth (default: greyjoy)"
+    <> value "greyjoy")
