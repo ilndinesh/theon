@@ -58,4 +58,7 @@ executable theon
                      http-types ==0.8.*,
                      haskakafka ==1.0.*,
                      containers ==0.5.*,
-                     network ==2.6.*
+                     network ==2.6.*,
+                     aeson ==0.9.*,
+                     regex-compat ==0.95.*,
+                     regex-posix ==0.95.*

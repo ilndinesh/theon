@@ -31,24 +31,15 @@ options :: Parser Options
 options = Options
   <$> strOption (long "broker"
     <> short 'b'
-    <> metavar "HOST_PORT"
+    <> metavar "HOST"
     <> help "Kafka broker address(es) (default: localhost:9092)"
     <> value "localhost:9092")
   <*> option auto (long "port"
     <> short 'p'
-    <> metavar "NUM"
+    <> metavar "PORT"
     <> help "Port to serve application (default: 3000)"
     <> value 3000)
-  <*> switch (long "auth"
-    <> short 'a'
-    <> help "Enable HTTP Basic Auth (default: false)")
-  <*> strOption (long "user"
-    <> short 'u'
-    <> metavar "USERNAME"
-    <> help "Username for HTTP Basic Auth (default: theon)"
-    <> value "theon")
-  <*> strOption (long "pass"
-    <> short 'w'
-    <> metavar "PASSWORD"
-    <> help "Password for HTTP Basic Auth (default: greyjoy)"
-    <> value "greyjoy")
+  <*> strOption (long "config"
+    <> short 'c'
+    <> metavar "FILE"
+    <> help "Path to configuration file (required)")
