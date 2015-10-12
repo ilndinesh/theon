@@ -62,6 +62,10 @@ Theon requires a JSON configuration file
 
 ## HTTP API
 
+### `GET /`
+
+Returns the current version of Theon.
+
 ### `POST /:topic -d {}`
 
 Request data will be relayed to the given `:topic` in Kafka. Multiple messages,
@@ -70,6 +74,10 @@ separated by newlines, will be sent as a batch.
 
 
 ## Changelog
+
+### v1.1.1.0
+
+- New `GET /` endpoint returns the application version
 
 ### v1.1.0.0
 
