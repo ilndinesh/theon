@@ -1,4 +1,4 @@
-# Theon ![Version](https://img.shields.io/badge/latest-1.1.0.0-brightgreen.svg?style=flat-square)
+# Theon ![Version](https://img.shields.io/badge/latest-1.1.1.0-brightgreen.svg?style=flat-square)
 
 A simple HTTP-to-Kafka relay built for speed
 
