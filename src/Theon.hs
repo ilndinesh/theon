@@ -48,6 +48,10 @@ type TopicMap = Map Topic KafkaTopic
 contentTypePlain = [ ("Content-Type", "text/plain") ]
 
 
+versionBL :: BL.ByteString
+versionBL = BL.pack $ showVersion version
+
+
 versionMode :: IO ()
 versionMode = putStrLn $ showVersion version
 
@@ -126,6 +130,11 @@ app chan req respond = do
   rawMessages <- requestBody req
   let messages = BS.split '\n' rawMessages
   let topic    = BS.drop 1 $ rawPathInfo req
-  writeChan chan (topic, messages)
-  respond $
-    responseLBS status200 contentTypePlain ""
+  case BS.null topic of
+    True -> do
+      respond $
+        responseLBS status200 contentTypePlain versionBL
+    False -> do
+      writeChan chan (topic, messages)
+      respond $
+        responseLBS status200 contentTypePlain ""
