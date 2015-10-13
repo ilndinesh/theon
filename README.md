@@ -71,6 +71,11 @@ Returns the current version of Theon.
 Request data will be relayed to the given `:topic` in Kafka. Multiple messages,
 separated by newlines, will be sent as a batch.
 
+### `POST /:topic/:key -d {}`
+
+Request data will be relayed with the given `:key` to a particular `:topic` in
+Kafka. Multiple messages, separated by newlines, will be sent as a batch.
+
 
 
 ## Changelog

@@ -39,9 +39,11 @@ data Mode = VersionMode | NormalMode Options deriving (Eq, Ord, Show)
 
 type Topic = ByteString
 
+type Key = ByteString
+
 type Message = ByteString
 
-type ProduceEvent = (Topic, [Message])
+type ProduceEvent = (Topic, Key, [Message])
 
 type TopicMap = Map Topic KafkaTopic
 
@@ -81,7 +83,6 @@ kafkaTopicConfig defaults topicsConf topic =
 main :: Options -> Config -> IO ()
 main opts conf = do
   putStrLn $ show opts
-  putStrLn $ show conf
 
   let kafkaConf = kafkaConfig conf
   let kafkaTopicDefaultsConf = kafkaTopicDefaultsConfig conf
@@ -101,10 +102,16 @@ main opts conf = do
       checkAuthorization basicAuthConf $ app chan
 
 
+producer :: Key -> (Message -> KafkaProduceMessage)
+producer k = case BS.null k of
+  True  -> (\m -> KafkaProduceMessage m)
+  False -> (\m -> KafkaProduceKeyedMessage k m)
+
+
 process :: Chan ProduceEvent -> Kafka -> TopicMap -> ConfigOverrides -> Map String ConfigOverrides -> IO ()
 process chan kafka topics kafkaTopicDefaultsConf kafkaTopicsConf = do
-  (topicName, rawMessages) <- readChan chan
-  let messages = map (\m -> KafkaProduceMessage m) rawMessages
+  (topicName, messageKey, rawMessages) <- readChan chan
+  let messages = map (producer messageKey) rawMessages
   case Map.lookup topicName topics of
     Nothing -> do
       let topicString = BS.unpack topicName
@@ -128,13 +135,15 @@ checkAuthorization userPasses =
 app :: Chan ProduceEvent -> Application
 app chan req respond = do
   rawMessages <- requestBody req
-  let messages = BS.split '\n' rawMessages
-  let topic    = BS.drop 1 $ rawPathInfo req
+  let messages    = BS.split '\n' rawMessages
+  let topicAndKey = BS.drop 1 $ rawPathInfo req
+  let topic:key:_ = (BS.split '/' topicAndKey) ++ (repeat "")
+
   case BS.null topic of
     True -> do
       respond $
         responseLBS status200 contentTypePlain versionBL
     False -> do
-      writeChan chan (topic, messages)
+      writeChan chan (topic, key, messages)
       respond $
         responseLBS status200 contentTypePlain ""
