@@ -1,4 +1,4 @@
-# Theon ![Version](https://img.shields.io/badge/latest-1.1.1.0-brightgreen.svg?style=flat-square)
+# Theon ![Version](https://img.shields.io/badge/latest-1.1.2.0-brightgreen.svg?style=flat-square)
 
 A simple HTTP-to-Kafka relay built for speed
 
@@ -74,11 +74,16 @@ separated by newlines, will be sent as a batch.
 ### `POST /:topic/:key -d {}`
 
 Request data will be relayed with the given `:key` to a particular `:topic` in
-Kafka. Multiple messages, separated by newlines, will be sent as a batch.
+Kafka. Multiple messages, separated by newlines, will be sent as a batch using
+the same key.
 
 
 
 ## Changelog
+
+### v1.1.2.0
+
+- Add support for keyed messages
 
 ### v1.1.1.0
 
