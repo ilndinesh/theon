@@ -61,5 +61,5 @@ executable theon
                      network ==2.6.*,
                      aeson ==0.9.*,
                      regex-compat ==0.95.*,
-                     regex-posix ==0.95.*
+                     regex-posix ==0.95.*,
                      split ==0.2.*
