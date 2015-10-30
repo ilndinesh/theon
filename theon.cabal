@@ -62,3 +62,4 @@ executable theon
                      aeson ==0.9.*,
                      regex-compat ==0.95.*,
                      regex-posix ==0.95.*
+                     split ==0.2.*
