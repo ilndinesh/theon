@@ -15,7 +15,7 @@ import Network.HTTP.Types (status200, status401)
 import qualified Network.Wai.Middleware.HttpAuth as Auth
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Data.Text as T
+import qualified Data.List.Split as DLS
 import Data.ByteString.Char8 (ByteString)
 import Control.Concurrent (forkIO)
 import Control.Concurrent.Chan
@@ -136,7 +136,7 @@ checkAuthorization userPasses =
 app :: Chan ProduceEvent -> Application
 app chan req respond = do
   rawMessages <- requestBody req
-  let messages    = T.splitOn "\r\n" rawMessages
+  let messages    = DLS.splitOn "\r\n" rawMessages
   let topicAndKey = BS.drop 1 $ rawPathInfo req
   let topic:key:_ = (BS.split '/' topicAndKey) ++ (repeat "")
 
