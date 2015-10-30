@@ -81,6 +81,10 @@ the same key.
 
 ## Changelog
 
+### v1.1.2.1
+
+- Split the raw messages by "\r\n"
+
 ### v1.1.2.0
 
 - Add support for keyed messages
