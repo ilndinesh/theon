@@ -17,3 +17,5 @@ doc
 tmp
 dist
 .vagrant
+.project
+/.dist-buildwrapper/

@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
- 
+
 module Theon (Options(..), Mode(..), versionMode, normalMode) where
 
 import Paths_theon (version)
@@ -136,7 +136,7 @@ checkAuthorization userPasses =
 app :: Chan ProduceEvent -> Application
 app chan req respond = do
   rawMessages <- requestBody req
-  let messages    = T.splitOn "\r\n" rawMessages
+  let messages    = T.splitOn "\r\n" (T.pack rawMessages)
   let topicAndKey = BS.drop 1 $ rawPathInfo req
   let topic:key:_ = (BS.split '/' topicAndKey) ++ (repeat "")
 
