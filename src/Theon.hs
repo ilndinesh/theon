@@ -136,7 +136,7 @@ checkAuthorization userPasses =
 app :: Chan ProduceEvent -> Application
 app chan req respond = do
   rawMessages <- requestBody req
-  let messages    = T.splitOn "\r\n" (T.pack rawMessages)
+  let messages    = map (\x -> BS.pack (T.unpack x)) (T.splitOn "\r\n" (T.pack (BS.unpack rawMessages)))
   let topicAndKey = BS.drop 1 $ rawPathInfo req
   let topic:key:_ = (BS.split '/' topicAndKey) ++ (repeat "")
 
